@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --azul: #025af5;
+    --blanco: #ffffff;
+    --siempreblanco: #ffffff;
+    --gris: #f1f7fd;
+    --gris2: #e8e9e9;
+    --grisoscuro: #8a95aa;
+    --amarillopastel: #fff1cc;
+    --verdepastel: #d8f5dc;
+    --rojopastel: #fddedd;
+    --negro: #000000;
+    --amarillo: #fe9f17;
+    --verde: #14c973;
+    --rojo: #f5333e;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-size: 2vh;
+    font-family: "Montserrat", sans-serif;
+    color: var(--negro);
+    line-height: 1;
+    font-weight: 600;
+    border: none;
+    outline: none;
+    text-align: center;
+}
+
+.dark {
+    --azul: #025af5;
+    --blanco: #121c2e;
+    --gris: #090e15;
+    --amarillopastel: #fff1cc;
+    --verdepastel: #d8f5dc;
+    --rojopastel: #fddedd;
+    --negro: #ffffff;
+    --amarillo: #fe9f17;
+    --verde: #14c973;
+    --rojo: #f5333e;
+}
+
+html,
+body {
+    min-height: 100%;
+    background-color: #121c2e;
+    color-scheme: dark;
+}
+
+main {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    display: grid;
+    grid-template:
+        "HEA HEA HEA" auto
+        "SEC SEC SEC" 1fr
+        "FOO FOO FOO" auto /
+        auto auto auto;
+}
+
+header {
+    grid-area: HEA;
+    display: flex;
+    height: 8vh;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2vh;
+    background-color: var(--gris);
+}
+
+section {
+    grid-area: SEC;
+    background-color: var(--gris);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2vh;
+    position: relative;
+    padding: 2vh;
+    overflow-y: auto;
+}
+
+h1 { font-size: 2.8vh; font-weight: 900; }
+h2 { font-size: 2.5vh; font-weight: 800; }
+h3, h4 { font-size: 2.2vh; font-weight: 600; }
+
+p {
+    color: var(--grisoscuro);
+    font-size: 1.7vh;
+    font-weight: 500;
+}
+
+img {
+    max-width: 22vh;
+    width: 100vw;
+    margin-bottom: 2vh;
+}
+
+img.logo {
+    width: 13vh;
+    margin: 0;
+}
+
+button.azul {
+    width: 100%;
+    height: 5vh;
+    max-width: 50vh;
+    margin-top: 2vh;
+    border-radius: 3vh;
+    background-color: var(--azul);
+    color: var(--siempreblanco);
+    font-size: 1.6vh;
+    font-weight: 500;
+}
+
+button.qr {
+    width: 5vh;
+    height: 5vh;
+    padding: 0;
+    border-radius: 5vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--azul);
+}
+
+button.qr img {
+    width: 2.5vh;
+    height: 3vh;
+    margin: 0;
+}
+
+button.secundario {
+    width: 100%;
+    height: 5vh;
+    max-width: 50vh;
+    margin-top: 1vh;
+    border-radius: 3vh;
+    background-color: #ffffff;
+    color: var(--azul);
+    font-size: 1.6vh;
+    font-weight: 600;
+}

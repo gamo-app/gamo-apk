@@ -1,0 +1,20 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.gamoekk.app'
+    compileSdk 36
+
+    sourceSets {
+        main.res.srcDirs = ['src/main/res', 'src/main/res-icon']
+    }
+
+    defaultConfig {
+        applicationId 'com.gamoekk.app'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
+}
