@@ -22,3 +22,6 @@ secrets.properties
 *.aab
 *.ap_
 *.dex
+
+# Archivos temporales del workflow
+publicar/

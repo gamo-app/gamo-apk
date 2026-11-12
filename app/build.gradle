@@ -2,6 +2,12 @@ plugins {
     id 'com.android.application'
 }
 
+// La compilación de GitHub Actions pasa -PversionCode / -PversionName.
+// Sin esos parámetros se usan los valores por defecto de desarrollo.
+def versionCodeCompilacion = (findProperty('versionCode') ?: '1').toString().toInteger()
+def versionNameCompilacion = (findProperty('versionName') ?: '1.0').toString()
+def rutaKeystore = findProperty('RELEASE_STORE_FILE')
+
 android {
     namespace 'com.gamoekk.app'
     compileSdk 36
@@ -10,11 +16,43 @@ android {
         main.res.srcDirs = ['src/main/res', 'src/main/res-icon']
     }
 
+    signingConfigs {
+        if (rutaKeystore) {
+            release {
+                storeFile file(rutaKeystore)
+                storePassword findProperty('RELEASE_STORE_PASSWORD')
+                keyAlias findProperty('RELEASE_KEY_ALIAS')
+                keyPassword findProperty('RELEASE_KEY_PASSWORD')
+            }
+        }
+    }
+
     defaultConfig {
         applicationId 'com.gamoekk.app'
         minSdk 23
         targetSdk 35
-        versionCode 1
-        versionName '1.0'
+        versionCode versionCodeCompilacion
+        versionName versionNameCompilacion
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+
+            if (rutaKeystore) {
+                signingConfig signingConfigs.release
+            } else {
+                // Sin keystore de release se firma con la clave de depuración.
+                // Es instalable, pero las actualizaciones necesitan una firma
+                // estable: configurar los secrets del keystore en GitHub.
+                signingConfig signingConfigs.debug
+            }
+        }
+    }
+
+    lint {
+        // El análisis vital (lintVital) descarga artefactos extra y no es
+        // necesario para publicar el APK desde GitHub Actions.
+        checkReleaseBuilds false
     }
 }
