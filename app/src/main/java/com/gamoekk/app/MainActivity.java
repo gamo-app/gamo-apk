@@ -18,8 +18,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Insets;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -30,7 +28,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -46,8 +43,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -172,8 +167,11 @@ public class MainActivity extends Activity {
     private String callbackPermisoNotificaciones;
 
     private View pantallaActualizacion;
-    private TextView textoEstadoActualizacion;
-    private TextView botonDescargarActualizacion;
+    private WebView updateView;
+    private int codigoActualizacion;
+    private String versionNameActualizacion;
+    private String notasActualizacion;
+    private String urlActualizacion;
     private String urlActualizacionPendiente;
     private long idDescargaActualizacion = -1;
     private BroadcastReceiver receptorDescarga;
@@ -722,148 +720,92 @@ public class MainActivity extends Activity {
             return;
         }
 
-        float densidad = getResources().getDisplayMetrics().density;
-        int padding = Math.round(28 * densidad);
+        codigoActualizacion = codigo;
+        versionNameActualizacion = nombre;
+        notasActualizacion = notas;
+        urlActualizacion = url;
 
-        LinearLayout columna = new LinearLayout(this);
-        columna.setOrientation(LinearLayout.VERTICAL);
-        columna.setGravity(Gravity.CENTER);
-        columna.setPadding(padding, padding, padding, padding);
+        WebView vista = new WebView(this);
 
-        TextView titulo = new TextView(this);
-        titulo.setText("Nueva actualización de GAMO");
-        titulo.setTextColor(Color.WHITE);
-        titulo.setTextSize(24);
-        titulo.setTypeface(Typeface.DEFAULT_BOLD);
-        titulo.setGravity(Gravity.CENTER);
-        columna.addView(titulo);
+        WebSettings ajustes = vista.getSettings();
+        ajustes.setJavaScriptEnabled(true);
+        ajustes.setDomStorageEnabled(true);
+        ajustes.setAllowFileAccess(true);
 
-        TextView version = new TextView(this);
-        version.setText("Versión " + nombre);
-        version.setTextColor(Color.parseColor("#8A95AA"));
-        version.setTextSize(15);
-        version.setGravity(Gravity.CENTER);
-        version.setPadding(
-                0,
-                Math.round(10 * densidad),
-                0,
-                Math.round(22 * densidad)
-        );
-        columna.addView(version);
+        vista.setBackgroundColor(Color.parseColor("#121C2E"));
 
-        if (notas != null && !notas.trim().isEmpty()) {
-            TextView detalle = new TextView(this);
-            detalle.setText(notas.trim());
-            detalle.setTextColor(Color.parseColor("#C7CEDA"));
-            detalle.setTextSize(15);
-            detalle.setGravity(Gravity.CENTER);
-            detalle.setMaxLines(5);
-            detalle.setPadding(
-                    0,
-                    0,
-                    0,
-                    Math.round(22 * densidad)
-            );
-            columna.addView(detalle);
-        }
+        vista.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void descargarActualizacion() {
+                runOnUiThread(() ->
+                        iniciarActualizacion(urlActualizacion));
+            }
 
-        final TextView botonDescargar = new TextView(this);
-        botonDescargar.setText("Descargar actualización");
-        botonDescargar.setTextColor(Color.WHITE);
-        botonDescargar.setTextSize(16);
-        botonDescargar.setTypeface(Typeface.DEFAULT_BOLD);
-        botonDescargar.setGravity(Gravity.CENTER);
-        botonDescargar.setClickable(true);
-        botonDescargar.setFocusable(true);
-        botonDescargar.setBackground(
-                fondoRedondeado(Color.parseColor("#025AF5"), 26)
-        );
+            @JavascriptInterface
+            public void omitirActualizacion() {
+                runOnUiThread(() -> {
+                    getSharedPreferences("GamoPrefs", MODE_PRIVATE)
+                            .edit()
+                            .putInt("version_ignorada", codigoActualizacion)
+                            .apply();
 
-        botonDescargarActualizacion = botonDescargar;
+                    cerrarPantallaActualizacion();
+                });
+            }
+        }, "AndroidApp");
 
-        LinearLayout.LayoutParams paramsDescargar =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        Math.round(54 * densidad)
-                );
-        paramsDescargar.topMargin = Math.round(4 * densidad);
-        botonDescargar.setLayoutParams(paramsDescargar);
-        columna.addView(botonDescargar);
+        vista.setWebChromeClient(new WebChromeClient());
 
-        TextView botonCancelar = new TextView(this);
-        botonCancelar.setText("Ahora no");
-        botonCancelar.setTextColor(Color.parseColor("#8A95AA"));
-        botonCancelar.setTextSize(15);
-        botonCancelar.setGravity(Gravity.CENTER);
-        botonCancelar.setClickable(true);
-        botonCancelar.setFocusable(true);
+        vista.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String pageUrl) {
+                super.onPageFinished(view, pageUrl);
+                enviarDatosActualizacion(view);
+            }
 
-        LinearLayout.LayoutParams paramsCancelar =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        Math.round(48 * densidad)
-                );
-        paramsCancelar.topMargin = Math.round(10 * densidad);
-        botonCancelar.setLayoutParams(paramsCancelar);
-        columna.addView(botonCancelar);
+            @Override
+            public boolean shouldOverrideUrlLoading(
+                    WebView view,
+                    WebResourceRequest request
+            ) {
+                return true;
+            }
+        });
 
-        textoEstadoActualizacion = new TextView(this);
-        textoEstadoActualizacion.setText(
-                "Descargando la actualización…"
-        );
-        textoEstadoActualizacion.setTextColor(
-                Color.parseColor("#8A95AA")
-        );
-        textoEstadoActualizacion.setTextSize(13);
-        textoEstadoActualizacion.setGravity(Gravity.CENTER);
-        textoEstadoActualizacion.setPadding(
-                0,
-                Math.round(14 * densidad),
-                0,
-                0
-        );
-        textoEstadoActualizacion.setVisibility(View.GONE);
-        columna.addView(textoEstadoActualizacion);
+        updateView = vista;
+        pantallaActualizacion = vista;
 
-        FrameLayout pantalla = new FrameLayout(this);
-        pantalla.setBackgroundColor(Color.parseColor("#121C2E"));
-        pantalla.setClickable(true);
-        pantalla.addView(columna, new FrameLayout.LayoutParams(
+        vista.loadUrl("file:///android_asset/actualizacion.html");
+
+        content.addView(vista, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
         ));
-
-        pantallaActualizacion = pantalla;
-
-        content.addView(pantalla, new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-        ));
-
-        botonDescargar.setOnClickListener(v -> {
-            botonDescargar.setEnabled(false);
-            iniciarActualizacion(url);
-        });
-
-        botonCancelar.setOnClickListener(v -> {
-            urlActualizacionPendiente = null;
-
-            getSharedPreferences("GamoPrefs", MODE_PRIVATE)
-                    .edit()
-                    .putInt("version_ignorada", codigo)
-                    .apply();
-
-            cerrarPantallaActualizacion();
-        });
     }
 
-    private GradientDrawable fondoRedondeado(int color, int radioDp) {
-        GradientDrawable fondo = new GradientDrawable();
-        fondo.setColor(color);
-        fondo.setCornerRadius(
-                radioDp * getResources().getDisplayMetrics().density
-        );
-        return fondo;
+    private void enviarDatosActualizacion(WebView vista) {
+        if (vista == null) return;
+
+        try {
+            JSONObject datos = new JSONObject();
+            datos.put(
+                    "versionName",
+                    versionNameActualizacion == null
+                            ? ""
+                            : versionNameActualizacion
+            );
+            datos.put(
+                    "notes",
+                    notasActualizacion == null ? "" : notasActualizacion
+            );
+
+            vista.evaluateJavascript(
+                    "window.mostrarActualizacion(" + datos + ");",
+                    null
+            );
+        } catch (JSONException ignored) {
+            // Sin datos: la pantalla muestra los valores por defecto.
+        }
     }
 
     private void cerrarPantallaActualizacion() {
@@ -874,9 +816,44 @@ public class MainActivity extends Activity {
             padre.removeView(pantallaActualizacion);
         }
 
+        if (updateView != null) {
+            updateView.destroy();
+            updateView = null;
+        }
+
         pantallaActualizacion = null;
-        textoEstadoActualizacion = null;
-        botonDescargarActualizacion = null;
+    }
+
+    private void habilitarDescargaActualizacion() {
+        if (updateView == null) return;
+
+        updateView.evaluateJavascript(
+                "window.actualizacionError && "
+                        + "window.actualizacionError('');",
+                null
+        );
+    }
+
+    private void marcarDescargaEnCurso() {
+        if (updateView == null) return;
+
+        updateView.evaluateJavascript(
+                "window.actualizacionDescargando && "
+                        + "window.actualizacionDescargando();",
+                null
+        );
+    }
+
+    private void avisarErrorActualizacion(String mensaje) {
+        if (updateView != null) {
+            String js = "window.actualizacionError && "
+                    + "window.actualizacionError("
+                    + JSONObject.quote(mensaje)
+                    + ");";
+            updateView.evaluateJavascript(js, null);
+        }
+
+        Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show();
     }
 
     private boolean necesitaPermisoInstalacion() {
@@ -887,31 +864,15 @@ public class MainActivity extends Activity {
     private void iniciarActualizacion(String url) {
         if (necesitaPermisoInstalacion()) {
             urlActualizacionPendiente = url;
+            habilitarDescargaActualizacion();
             mostrarDialogoPermisoInstalacion();
-
-            if (textoEstadoActualizacion != null) {
-                textoEstadoActualizacion.setVisibility(View.GONE);
-            }
-
             return;
         }
 
-        if (textoEstadoActualizacion != null) {
-            textoEstadoActualizacion.setVisibility(View.VISIBLE);
-        }
+        marcarDescargaEnCurso();
 
         if (!descargarEInstalar(url)) {
-            if (textoEstadoActualizacion != null) {
-                textoEstadoActualizacion.setVisibility(View.GONE);
-            }
-            if (botonDescargarActualizacion != null) {
-                botonDescargarActualizacion.setEnabled(true);
-            }
-            Toast.makeText(
-                    this,
-                    "No se pudo iniciar la descarga.",
-                    Toast.LENGTH_LONG
-            ).show();
+            avisarErrorActualizacion("No se pudo iniciar la descarga.");
         }
     }
 
@@ -941,15 +902,11 @@ public class MainActivity extends Activity {
                 })
                 .setNegativeButton("Cancelar", (dialog, which) -> {
                     urlActualizacionPendiente = null;
-                    if (botonDescargarActualizacion != null) {
-                        botonDescargarActualizacion.setEnabled(true);
-                    }
+                    habilitarDescargaActualizacion();
                 })
                 .setOnCancelListener(dialog -> {
                     urlActualizacionPendiente = null;
-                    if (botonDescargarActualizacion != null) {
-                        botonDescargarActualizacion.setEnabled(true);
-                    }
+                    habilitarDescargaActualizacion();
                 })
                 .show();
     }
@@ -1039,17 +996,9 @@ public class MainActivity extends Activity {
         File apk = archivoApkDescargado();
 
         if (apk == null || !apk.exists() || apk.length() == 0) {
-            if (textoEstadoActualizacion != null) {
-                textoEstadoActualizacion.setText(
-                        "No se pudo descargar la actualización."
-                );
-            }
-
-            Toast.makeText(
-                    this,
-                    "No se pudo descargar la actualización.",
-                    Toast.LENGTH_LONG
-            ).show();
+            avisarErrorActualizacion(
+                    "No se pudo descargar la actualización."
+            );
             return;
         }
 
@@ -1524,27 +1473,15 @@ public class MainActivity extends Activity {
             String url = urlActualizacionPendiente;
             urlActualizacionPendiente = null;
 
-            if (textoEstadoActualizacion != null) {
-                textoEstadoActualizacion.setVisibility(View.VISIBLE);
-            }
+            marcarDescargaEnCurso();
 
             if (!descargarEInstalar(url)) {
-                if (textoEstadoActualizacion != null) {
-                    textoEstadoActualizacion.setVisibility(View.GONE);
-                }
-                if (botonDescargarActualizacion != null) {
-                    botonDescargarActualizacion.setEnabled(true);
-                }
-
-                Toast.makeText(
-                        this,
-                        "No se pudo iniciar la descarga.",
-                        Toast.LENGTH_LONG
-                ).show();
+                avisarErrorActualizacion(
+                        "No se pudo iniciar la descarga."
+                );
             }
-        } else if (urlActualizacionPendiente != null
-                && botonDescargarActualizacion != null) {
-            botonDescargarActualizacion.setEnabled(true);
+        } else if (urlActualizacionPendiente != null) {
+            habilitarDescargaActualizacion();
         }
     }
 
@@ -1580,6 +1517,13 @@ public class MainActivity extends Activity {
         if (offlineView != null) {
             offlineView.destroy();
         }
+
+        if (updateView != null) {
+            updateView.destroy();
+            updateView = null;
+        }
+
+        pantallaActualizacion = null;
 
         if (seleccionArchivoCallback != null) {
             seleccionArchivoCallback.onReceiveValue(null);

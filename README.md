@@ -101,7 +101,7 @@ En la pestaña **Actions** también queda el APK de cada compilación como *arti
 
 ## Actualizaciones automáticas
 
-Al abrir la app se consulta el archivo `version.json` publicado en la última release. Si su `versionCode` es mayor que el instalado, se muestra una pantalla con la versión nueva, una nota y el botón **Descargar actualización**:
+Al abrir la app se consulta el archivo `version.json` publicado en la última release. Si su `versionCode` es mayor que el instalado, se muestra una pantalla con la versión nueva, una nota y el botón **Descargar actualización**. La pantalla es HTML (`app/src/main/assets/actualizacion.html`) y usa el mismo `offline.css` que las demás pantallas locales, con `appcelular.svg` al centro.
 
 1. La app descarga `gamo.apk` con el gestor de descargas del sistema.
 2. Si es la primera vez, Android pide permitir la instalación desde GAMO.

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización disponible</title>
+    <link rel="stylesheet" href="offline.css">
+    <style>
+        #notas {
+            white-space: pre-line;
+        }
+
+        #estado {
+            min-height: 2vh;
+        }
+
+        #omitir {
+            background-color: transparent;
+            color: var(--grisoscuro);
+            margin-top: 1vh;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+        }
+
+        .oculto {
+            display: none;
+        }
+    </style>
+</head>
+<body class="dark">
+    <main class="dark">
+        <header>
+            <img src="logo.svg" class="logo" alt="">
+        </header>
+        <section>
+            <img src="appcelular.svg" alt="">
+            <h3>Nueva actualización disponible</h3>
+            <p id="version"></p>
+            <p id="notas" class="oculto"></p>
+
+            <button type="button" class="azul" id="descargar">
+                Descargar actualización
+            </button>
+            <button type="button" class="secundario" id="omitir">
+                Ahora no
+            </button>
+            <p id="estado"></p>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            var version = document.getElementById("version");
+            var notas = document.getElementById("notas");
+            var estado = document.getElementById("estado");
+            var descargar = document.getElementById("descargar");
+            var omitir = document.getElementById("omitir");
+            var disponible = false;
+
+            window.mostrarActualizacion = function (datos) {
+                if (!datos) return;
+
+                disponible = true;
+
+                version.textContent = datos.versionName
+                    ? "Versión " + datos.versionName
+                    : "";
+
+                var textoNotas = (datos.notes || "").trim();
+                notas.textContent = textoNotas;
+                notas.className = textoNotas ? "" : "oculto";
+            };
+
+            window.actualizacionDescargando = function (texto) {
+                estado.textContent = texto || "Descargando la actualización…";
+                descargar.disabled = true;
+            };
+
+            window.actualizacionError = function (texto) {
+                estado.textContent = texto || "";
+                descargar.disabled = false;
+            };
+
+            descargar.addEventListener("click", function () {
+                if (!disponible) return;
+
+                window.actualizacionDescargando();
+
+                if (window.AndroidApp && AndroidApp.descargarActualizacion) {
+                    AndroidApp.descargarActualizacion();
+                }
+            });
+
+            omitir.addEventListener("click", function () {
+                if (window.AndroidApp && AndroidApp.omitirActualizacion) {
+                    AndroidApp.omitirActualizacion();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
