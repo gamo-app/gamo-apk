@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi QR sin conexión</title>
+  <link rel="stylesheet" href="offline.css">
+</head>
+<body class="dark qr-sin-conexion">
+  <main class="dark">
+    <header>
+            <img src="logo.svg" class="logo" alt="">
+           
+        </header>
+    <section>
+      <h1>QR sin conexión</h1>
+      <p id="estado">Cargando datos guardados…</p>
+      <div id="qr" aria-label="Código QR"></div>
+      <button type="button" class="azul" onclick="AndroidApp.volverSinConexion()">Volver</button>
+    </section>
+  </main>
+  <script src="qrcodegen.js"></script>
+  <script>
+    try {
+      const usuario = JSON.parse(AndroidApp.obtenerUsuarioSesion() || "{}");
+      const id = usuario.uuid_usuario;
+      if (!id) throw new Error("No hay un usuario guardado. Conéctate e inicia sesión primero.");
+
+      const url = "http://gamo-ekk.pages.dev/escanear/" + encodeURIComponent(id);
+      const codigo = qrcodegen.QrCode.encodeText(url, qrcodegen.QrCode.Ecc.MEDIUM);
+      const matriz = codigo.getModules();
+      const margen = 4;
+      const total = matriz.length + margen * 2;
+      const celda = 8;
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = total * celda;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#000";
+      matriz.forEach((fila, y) => fila.forEach((oscura, x) => {
+        if (oscura) ctx.fillRect((x + margen) * celda, (y + margen) * celda, celda, celda);
+      }));
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      document.getElementById("qr").appendChild(canvas);
+      document.getElementById("estado").textContent = "QR del usuario " + (usuario.nombre || "");
+    } catch (error) {
+      document.getElementById("estado").className = "error";
+      document.getElementById("estado").textContent = error.message || "No se pudo generar el código QR.";
+    }
+  </script>
+</body>
+</html>

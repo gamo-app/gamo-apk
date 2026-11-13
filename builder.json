@@ -1,0 +1,22 @@
+{
+  "project": "GamoEkkIOS",
+  "platform": "ios",
+  "github": {
+    "owner": "gamo-app",
+    "repo": "gamo-apk"
+  },
+  "ios": {
+    "path": "ios_project",
+    "scheme": "GamoEkkIOS",
+    "bundleId": "com.gamoekk.app",
+    "configuration": "Debug"
+  },
+  "profiles": {
+    "development": {
+      "distribution": "development"
+    },
+    "store": {
+      "distribution": "store"
+    }
+  }
+}
