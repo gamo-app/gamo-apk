@@ -87,6 +87,10 @@ final class WebViewBridge: NSObject, WKScriptMessageHandler,
 
     // MARK: - WKUIDelegate (selector de archivos)
 
+    // En iOS 18.4+ se puede interceptar el selector para ofrecer Cámara,
+    // Fototeca y Archivos. En versiones anteriores WKWebView muestra su
+    // selector de archivos del sistema automáticamente.
+    @available(iOS 18.4, *)
     func webView(_ webView: WKWebView,
                  runOpenPanelWith parameters: WKOpenPanelParameters,
                  initiatedByFrame frame: WKFrameInfo,
