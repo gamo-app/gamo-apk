@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin conexión</title>
+    <link rel="stylesheet" href="offline.css">
+</head>
+<body>
+    <main class="dark">
+        <header>
+            <img src="logo.svg" class="logo" alt="">
+             <button class="qr" type="button"
+                onclick="if (window.AndroidApp) AndroidApp.abrirQrSinConexion();">
+                <img src="qr.svg" alt="">
+            </button>
+        </header>
+        <section>
+            <img src="sininternet.svg" alt="">
+            <h3>Sin conexión a internet</h3>
+            <p>Comprueba tu conexión a internet e inténtalo de nuevo.</p>
+
+            <button class="azul"
+                onclick="if (window.AndroidApp) AndroidApp.retry(); else location.reload();">
+                Recargar página
+            </button>
+
+
+
+
+        </section>
+    </main>
+
+</body>
+</html>
