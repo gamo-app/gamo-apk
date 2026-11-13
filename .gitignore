@@ -25,3 +25,8 @@ secrets.properties
 
 # Archivos temporales del workflow
 publicar/
+
+# Salidas de iOS-Builder
+dist/
+DerivedData/
+*.ipa
