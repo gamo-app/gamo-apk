@@ -9,13 +9,13 @@
 <body class="dark qr-sin-conexion">
   <main class="dark">
     <header>
-            <img src="logo.svg" class="logo" alt="">
-           
-        </header>
+      <img src="logo.svg" class="logo" alt="">
+    </header>
     <section>
-      <h1>QR sin conexión</h1>
+      <h1>Mi QR de asistencia</h1>
       <p id="estado">Cargando datos guardados…</p>
       <div id="qr" aria-label="Código QR"></div>
+      <p id="ayuda">Mostrá este código al profesor para registrar tu asistencia.</p>
       <button type="button" class="azul" onclick="AndroidApp.volverSinConexion()">Volver</button>
     </section>
   </main>
@@ -23,11 +23,23 @@
   <script>
     try {
       const usuario = JSON.parse(AndroidApp.obtenerUsuarioSesion() || "{}");
+      const codigoCredencial = (usuario.codigo_credencial || "").trim();
       const id = usuario.uuid_usuario;
-      if (!id) throw new Error("No hay un usuario guardado. Conéctate e inicia sesión primero.");
 
-      const url = "http://gamo-ekk.pages.dev/escanear/" + encodeURIComponent(id);
-      const codigo = qrcodegen.QrCode.encodeText(url, qrcodegen.QrCode.Ecc.MEDIUM);
+      if (!codigoCredencial && !id) {
+        throw new Error("No hay un usuario guardado. Conéctate e inicia sesión primero.");
+      }
+
+      // El QR de socio tiene el formato que espera el backend de GAMO:
+      // GAMO:ASISTENCIA:SOCIO:{codigo_credencial}
+      const payload = codigoCredencial
+        ? "GAMO:ASISTENCIA:SOCIO:" + codigoCredencial
+        : "http://gamo-ekk.pages.dev/escanear/" + encodeURIComponent(id);
+
+      const codigo = qrcodegen.QrCode.encodeText(
+        payload,
+        qrcodegen.QrCode.Ecc.MEDIUM
+      );
       const matriz = codigo.getModules();
       const margen = 4;
       const total = matriz.length + margen * 2;
@@ -44,10 +56,19 @@
       canvas.style.width = "100%";
       canvas.style.height = "100%";
       document.getElementById("qr").appendChild(canvas);
-      document.getElementById("estado").textContent = "QR del usuario " + (usuario.nombre || "");
+
+      if (codigoCredencial) {
+        document.getElementById("estado").textContent =
+          "QR de " + (usuario.nombre || "socio");
+      } else {
+        document.getElementById("estado").textContent =
+          "Conéctate una vez con internet para actualizar tu QR de asistencia.";
+      }
     } catch (error) {
       document.getElementById("estado").className = "error";
-      document.getElementById("estado").textContent = error.message || "No se pudo generar el código QR.";
+      document.getElementById("estado").textContent =
+        error.message || "No se pudo generar el código QR.";
+      document.getElementById("ayuda").style.display = "none";
     }
   </script>
 </body>

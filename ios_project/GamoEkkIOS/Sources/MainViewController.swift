@@ -374,7 +374,8 @@ final class MainViewController: UIViewController {
             "nombre": (obj["nombre"] as? String) ?? "",
             "apellido": (obj["apellido"] as? String) ?? "",
             "email": (obj["email"] as? String) ?? "",
-            "rol": (obj["rol"] as? String) ?? ""
+            "rol": (obj["rol"] as? String) ?? "",
+            "codigo_credencial": (obj["codigo_credencial"] as? String) ?? ""
         ]
 
         let defaults = UserDefaults.standard

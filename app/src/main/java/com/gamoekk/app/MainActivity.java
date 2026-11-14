@@ -427,6 +427,10 @@ public class MainActivity extends Activity {
             perfil.put("apellido", usuario.optString("apellido"));
             perfil.put("email", usuario.optString("email"));
             perfil.put("rol", usuario.optString("rol"));
+            perfil.put(
+                    "codigo_credencial",
+                    usuario.optString("codigo_credencial")
+            );
 
             getSharedPreferences("GamoPrefs", MODE_PRIVATE)
                     .edit()

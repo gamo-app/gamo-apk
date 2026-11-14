@@ -87,6 +87,7 @@ Las fotos temporales de la cámara se guardan en la caché de la app (`capturas/
 
 - URL del sitio: constante `SITE_URL` en `app/src/main/java/com/gamoekk/app/MainActivity.java`.
 - Pantalla sin conexión: `app/src/main/assets/sinconexion.html` y `app/src/main/assets/sininternet.svg`.
+- QR sin conexión: `app/src/main/assets/qrsinconexion.html`. Genera el QR de asistencia del socio con el payload `GAMO:ASISTENCIA:SOCIO:{codigo_credencial}`, usando el `codigo_credencial` guardado en la sesión local (`GamoPrefs` / `UserDefaults`).
 - Identificador Android: `com.gamoekk.app`.
 - Versión: `versionCode 1` y `versionName 1.0` por defecto en `app/build.gradle`. GitHub Actions las sobrescribe con el número de ejecución (`1.0.<run_number>`).
 

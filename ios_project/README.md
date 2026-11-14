@@ -4,9 +4,9 @@ Port nativo iOS de la aplicación Android `com.gamoekk.app` (Java + WebView),
 preparado para compilarse con [iOS-Builder](https://github.com/MobAI-App/ios-builder).
 
 La app Android original carga `https://gamo-ekk.pages.dev/` en un WebView y expone
-un puente JavaScript llamado `AndroidApp`. El sitio y las pantallas locales
-(`sinconexion.html`, `qrsinconexion.html`, `actualizacion.html`) no se modificaron:
-se copiaron tal cual a `GamoEkkIOS/Resources/WebAssets`.
+un puente JavaScript llamado `AndroidApp`. Las pantallas locales
+(`sinconexion.html`, `qrsinconexion.html`, `actualizacion.html`) y `offline.css`
+se mantienen sincronizadas con `app/src/main/assets`.
 
 ## Estructura
 

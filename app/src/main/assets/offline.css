@@ -137,6 +137,27 @@ button.qr img {
     margin: 0;
 }
 
+#qr {
+    width: min(70vw, 34vh);
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5vh;
+    border-radius: 1.5vh;
+    background-color: var(--siempreblanco);
+}
+
+#qr canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#qr:empty {
+    display: none;
+}
+
 button.secundario {
     width: 100%;
     height: 5vh;
